@@ -92,6 +92,14 @@ const email = `teacher@${domain}`;
 const settings = sheets.get('Settings');
 settings.getRange(2, 2).setValue(domain);
 settings.getRange(3, 2).setValue(email);
+// 専用シートの公開クライアントIDで本人確認でき、別のIDのトークンは拒否する。
+const testClientId = '123-testclient.apps.googleusercontent.com';
+context.UrlFetchApp = { fetch: () => ({
+  getResponseCode: () => 200,
+  getContentText: () => JSON.stringify({ aud: testClientId, iss: 'accounts.google.com', exp: Math.floor(Date.now() / 1000) + 3600, email_verified: 'true', hd: domain, email }),
+}) };
+assert.equal(call('gcValidateGoogle_', 'x'.repeat(100), { schoolDomain: domain, googleClientId: testClientId }), email);
+assert.throws(() => call('gcValidateGoogle_', 'x'.repeat(100), { schoolDomain: domain, googleClientId: '456-another.apps.googleusercontent.com' }), /学校のGoogleアカウント/);
 const today = Utilities.formatDate(new Date());
 const loginOnlyEmail = `student@${domain}`;
 const missingRosterEmail = `missing@${domain}`;

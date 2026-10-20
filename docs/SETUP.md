@@ -6,13 +6,13 @@
 
 1. 作成済みの「Gカード・ゲーム版」専用の空シートを使います。URLは学校側で管理し、公開リポジトリには書きません。共有は制限付きのままにします。元のGカードのシートをコピーすると個人情報と運用記録まで複製されるため、空のシートを使います。
 2. **その新しいシート**の「拡張機能 → Apps Script」を開き、このリポジトリの `gas/Code.gs`、`gas/Learning.gs`、`gas/Bridge.html` を同名ファイルとして登録します。元のApps Script編集画面には貼り付けません。
-3. まず `configureGameInstance()` を実行します。新しい空シートに紐づくプロジェクトだけで成功し、保存先をスクリプトプロパティに記録します。続けて `setup()` を実行し、各表を作ります。`Settings` の `schoolDomain` に学校メールの `@` 以降、`adminEmails` に先生の学校メールを設定します。Apps Scriptのスクリプトプロパティ `GOOGLE_CLIENT_ID` に、ゲーム版用のウェブアプリクライアントIDを登録します。`SESSION_SECRET` は `setup()` が作成します。
+3. まず `configureGameInstance()` を実行します。新しい空シートに紐づくプロジェクトだけで成功し、保存先をスクリプトプロパティに記録します。続けて `setup()` を実行し、各表を作ります。`Settings` の `schoolDomain` に学校メールの `@` 以降、`adminEmails` に先生の学校メールを設定します。`googleClientId` 行に手順2のクライアントIDを登録します。`SESSION_SECRET` は `setup()` が作成します。
 4. Apps Scriptを「ウェブアプリ」として**新規デプロイ**します。実行ユーザーは自分、アクセスは全員。新しく発行された `/exec` URLを控えます。元のデプロイのバージョン更新はしません。
 5. 新しい `Users` シートに名簿を登録します。ログインにはメールアドレスと氏名が必要です。管理者画面からCSVで取り込むこともできます。
 
 ## 2. Googleログイン
 
-Google Cloudでゲーム版用のウェブアプリクライアントIDを作成します。学校の設定で選べる場合は対象ユーザーを内部にします。GitHub Pagesで使う場合の承認済みJavaScript生成元は `https://ken-ui-web.github.io` です。クライアントIDを新しいApps Scriptの `GOOGLE_CLIENT_ID` と、このアプリの `VITE_GOOGLE_CLIENT_ID` に設定します。クライアントシークレットは使いません。
+元のGカードとゲーム版は同じ `https://ken-ui-web.github.io` をJavaScript生成元として使うため、元のGカードで動作確認済みのウェブアプリクライアントIDを再利用できます。Google Cloudで新しいIDを作成したり、元のクライアントを変更したりする必要はありません。既存のIDを**新しい専用シート**の `Settings` に `googleClientId` として、**新しいリポジトリ**のActions変数に `VITE_GOOGLE_CLIENT_ID` として設定します。このIDはログイン用の公開識別子であり、元のスプレッドシートやApps Scriptへの接続先ではありません。クライアントシークレットは使いません。
 
 ## 3. オンライン対戦
 
@@ -25,7 +25,7 @@ Google Cloudでゲーム版用のウェブアプリクライアントIDを作成
 | 変数 | 値 |
 | --- | --- |
 | `VITE_GAS_URL` | 手順1で発行したゲーム版専用 `/exec` URL |
-| `VITE_GOOGLE_CLIENT_ID` | 手順2のゲーム版用クライアントID |
+| `VITE_GOOGLE_CLIENT_ID` | 手順2の既存クライアントID |
 | `VITE_FIREBASE_CONFIG` | 手順3のゲーム版用Firebase設定JSON |
 
 想定URLは `https://ken-ui-web.github.io/g-card-game/#/home` です。元のリポジトリのActions変数やPages設定を変更しないでください。

@@ -226,7 +226,7 @@ function setup() {
     properties.setProperty('SESSION_SECRET', [Utilities.getUuid(), Utilities.getUuid(), Utilities.getUuid(), Utilities.getUuid()].join('-'));
   }
   ['Cards', 'Packs', 'Decks', 'Missions'].forEach(gcClearMasterCache_);
-  return 'Gカードの設定が完了しました。Settings の schoolDomain と adminEmails、スクリプトプロパティの GOOGLE_CLIENT_ID を確認してください。';
+  return 'Gカードの設定が完了しました。Settings の schoolDomain、adminEmails、googleClientId を確認してください。';
 }
 
 function doGet() {
@@ -379,7 +379,10 @@ function gcValidateGoogle_(idToken, settings) {
   const response = UrlFetchApp.fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken), { muteHttpExceptions: true });
   if (response.getResponseCode() !== 200) gcError_('INVALID_LOGIN', 'Googleログインをやり直してください');
   const info = JSON.parse(response.getContentText());
-  const clientId = gcProperty_('GOOGLE_CLIENT_ID');
+  // 同じGitHub Pages生成元を使うゲーム版では、公開識別子を専用シートに置ける。
+  // 既にスクリプトプロパティを設定している環境も引き続き使える。
+  const clientId = PropertiesService.getScriptProperties().getProperty('GOOGLE_CLIENT_ID') || String(settings.googleClientId || '').trim();
+  if (!/^\d+-[a-z0-9]+\.apps\.googleusercontent\.com$/.test(clientId)) gcError_('NOT_SETUP', 'Googleログインの設定が必要です');
   const email = String(info.email || '').toLowerCase();
   const validIssuer = info.iss === 'accounts.google.com' || info.iss === 'https://accounts.google.com';
   if (info.aud !== clientId || !validIssuer || Number(info.exp) * 1000 <= Date.now() ||
